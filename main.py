@@ -130,8 +130,8 @@ async def start_messaging_cycle(client, delay_time):
 
 
 async def send_messages_to_channels():
-    phone = get_valid_phone_number()  # Запрашиваем и проверяем телефон
-    api_id, api_hash = get_api_data()  # Получаем API-данные
+    phone = get_valid_phone_number() 
+    api_id, api_hash = get_api_data() 
 
     # Создаем клиента
     client = TelegramClient('session_name', api_id, api_hash)
@@ -139,7 +139,7 @@ async def send_messages_to_channels():
     try:
         # Авторизуемся
         print("Начало авторизации...")
-        await client.connect()  # Подключаем клиента
+        await client.connect()  
 
         # Проверяем авторизацию
         if not await client.is_user_authorized():
@@ -148,33 +148,25 @@ async def send_messages_to_channels():
             try:
                 # Пытаемся войти с номером телефона и кодом
                 await client.sign_in(phone, code=code)
-            except Exception as e:  # Более общий блок для всех исключений
+            except Exception as e:  
                 print(f"Ошибка при входе с кодом: {str(e)}")
                 if "Two-steps verification is enabled" in str(e):
                     password = input("Введите ваш пароль (двухфакторная аутентификация): ")
-                    await client.sign_in(phone, code=code, password=password)  # Вход с паролем
+                    await client.sign_in(phone, code=code, password=password) 
                 else:
                     print("Неизвестная ошибка, попробуйте еще раз.")
             except errors.FloodWaitError as e:
-                # Обработка ошибки слишком частых запросов
                 print(f'Слишком частые запросы. Пожалуйста, подождите {e.seconds} секунд.')
 
         print("Авторизация успешна!")
-
-        # Здесь вы можете продолжить свою логику отправки сообщений
-        # Например, запустите основной цикл рассылки
         delay_time = get_delay_time()
         await start_messaging_cycle(client, delay_time)
 
     except Exception as e:
-        # Обработка ошибок на более высоком уровне
         print(f"Произошла ошибка в процессе работы программы: {str(e)}")
     finally:
-        # Останавливаем клиент
         await client.disconnect()
 
-# Показываем заставку
 show_welcome_message()
 
-# Запуск программы
 asyncio.run(send_messages_to_channels())
